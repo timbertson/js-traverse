@@ -108,6 +108,11 @@ Traverse.prototype.clone = function () {
     })(this.value);
 };
 
+
+var isObject = function(o) {
+    return typeof(o) == 'object';
+};
+
 function walk (root, cb, immutable) {
     var path = [];
     var parents = [];
@@ -116,6 +121,7 @@ function walk (root, cb, immutable) {
     return (function walker (node_) {
         var node = immutable ? copy(node_) : node_;
         var modifiers = {};
+        modifiers.isTraversable = isObject;
         
         var keepGoing = true;
         
@@ -150,6 +156,7 @@ function walk (root, cb, immutable) {
                 if (stopHere) keepGoing = false;
             },
             keys : null,
+            isTraversable: function(f) { modifiers.isTraversable = f },
             before : function (f) { modifiers.before = f },
             after : function (f) { modifiers.after = f },
             pre : function (f) { modifiers.pre = f },
@@ -161,7 +168,7 @@ function walk (root, cb, immutable) {
         if (!alive) return state;
         
         function updateState() {
-            if (typeof state.node === 'object' && state.node !== null) {
+            if (modifiers.isTraversable(state.node) && state.node !== null) {
                 if (!state.keys || state.node_ !== state.node) {
                     state.keys = objectKeys(state.node)
                 }
@@ -194,7 +201,7 @@ function walk (root, cb, immutable) {
         
         if (!keepGoing) return state;
         
-        if (typeof state.node == 'object'
+        if (modifiers.isTraversable(state.node)
         && state.node !== null && !state.circular) {
             parents.push(state);
             
@@ -276,7 +283,7 @@ function copy (src) {
     else return src;
 }
 
-var objectKeys = Object.keys || function keys (obj) {
+var objectKeys = function keys (obj) {
     var res = [];
     for (var key in obj) res.push(key)
     return res;
