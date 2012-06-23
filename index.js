@@ -285,7 +285,9 @@ function copy (src) {
 
 var objectKeys = function keys (obj) {
     var res = [];
-    for (var key in obj) res.push(key)
+    for (var key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) res.push(key)
+    }
     return res;
 };
 

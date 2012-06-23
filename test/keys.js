@@ -29,3 +29,13 @@ test('sort test', function (t) {
     
     t.end();
 });
+
+test('ignore inherited properties', function(t) {
+    var Obj = function() {
+        this.ownProp = "mine";
+    }
+    Obj.prototype.inheritedProp = "not mine";
+    
+    t.equal(traverse.paths(new Obj()).join(','), ',ownProp');
+    t.end();
+});
